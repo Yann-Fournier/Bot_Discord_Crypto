@@ -1,1 +1,1 @@
-Changer -.env.exemple en -.env et insérer le token de votre bot etre les apostrophes.
+Changer ``.env.exemple`` en ``.env`` et insérer le token de votre bot etre les apostrophes.
