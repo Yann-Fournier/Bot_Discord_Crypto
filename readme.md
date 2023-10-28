@@ -1,1 +1,1 @@
-Ceci est un projet de B1
+Changer .env.exemple en .env et insérer le token de votre bot etre les apostrophes.
