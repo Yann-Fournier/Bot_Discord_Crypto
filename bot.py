@@ -12,14 +12,15 @@ intents = discord.Intents.all()
 client = commands.Bot(command_prefix="$", intents = intents)
 
 # Commandes -------------------------------------------------------------------------------------------------------------------------
-@client.command(name="commandes")
+@client.command(name="cmd")
 async def commandes(message):
     await message.channel.send("""
 ```markdown
 # Liste des commandes:
 
-  - $commandes: renvoie la liste des commandes
-  - $valeurs: renvoie la liste des valeurs principales.
+  - $cmd: renvoie la liste des commandes
+  - $val: renvoie la liste des valeurs principales.
+  - $ind: renvoie la liste des principaux indicateurs:
   
   
   - $test arg1: renvoie "test" et l'argument placer en paramètre
@@ -29,7 +30,7 @@ async def commandes(message):
 ```
 """)
     
-@client.command(name="valeurs")
+@client.command(name="val",)
 async def crypto(message):
     await message.channel.send("""
 ```markdown
@@ -57,11 +58,57 @@ async def crypto(message):
   
 ```
 """)
+    
+@client.command(name="ind")
+async def indicateurs(message):
+    await message.channel.send("""
+```markdown
+# Liste des principaux indicateurs:
+
+  - RSI: Relative Strength Index
+  - STOCH: Stochastique %K
+  - MACD: Convergence Divergence Moyenne Mobile (macd, macd_signal, macd_diff(bar-plot))
+  
+```
+""")
+
+
+
+
+
+@client.command(name="create")
+async def create_channel(message):
+  guild = message.guild
+  name = str(message.author) + "_plots"
+  
+  for channel in message.guild.channels:
+    if channel.name == name:
+      await message.send(f"The channel {name} is already instance")
+      return
+
+  await guild.create_text_channel(name)
+  await message.send(f"Created a channel named {name}")
+
+@client.command(name="delete")
+async def delete(message):
+  # await message.send(message.guild.me)
+  for channel in message.guild.channels:
+    if isinstance(channel, discord.TextChannel):
+      await message.send(f"The channel {channel} is instance")
+      # if channel.permissions_for(message.author).send_messages:
+      #   channel_used = channel
+      #   break
 
 @client.command(name="test")
-async def test(message, *arg1):
+async def test(message, *args):
   await message.channel.send("test")
-  await message.channel.send(arg1)
+  arguments = ', '.join(args)
+  await message.channel.send(f'{len(args)} arguments: {arguments}')
+  await message.channel.send(args)
+  try:
+    await message.channel.send(args[0].upper())
+  except:
+    await message.channel.send("Aucun argument donné")
 
 
 @client.command(name="img")
@@ -88,6 +135,7 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
+  
   # Permet au bo de ne pas ce parler à lui même
   # print(message.content)
   if message.author == client.user:
