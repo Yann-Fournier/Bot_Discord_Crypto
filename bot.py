@@ -71,23 +71,9 @@ async def indicateurs(message):
   
 ```
 """)
-
-
-
-
-
-@client.command(name="create")
-async def create_channel(message):
-  guild = message.guild
-  name = str(message.author) + "_plots"
   
-  for channel in message.guild.channels:
-    if channel.name == name:
-      await message.send(f"The channel {name} is already instance")
-      return
-
-  await guild.create_text_channel(name)
-  await message.send(f"Created a channel named {name}")
+  
+  
 
 @client.command(name="delete")
 async def delete(message):
@@ -117,6 +103,21 @@ async def test(message):
 
 @client.command(name="plot")
 async def plot(message, crypto, indicateur):
+  # Creation d'un channel perso pour envoyer les graphiques. ---------------------------
+  guild = message.guild
+  name = str(message.author) + "_plots"
+  is_already_create = False
+  
+  for channel in message.guild.channels:
+    if channel.name == name:
+      # await message.send(f"The channel {name} is already instance")
+      is_already_create = True
+
+  if is_already_create == False:
+    await guild.create_text_channel(name)
+    await message.send(f"Vous pouvez retrouver le vos graphhiques dand le channel {name.upper()}")
+  
+  # Envoie du graphique fini. -----------------------------------------------------
   await message.channel.send(f"Voici un graphique de {crypto} avec le {indicateur}.")
 
 # Events ---------------------------------------------------------------------------------------------------------------------------------
