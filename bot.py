@@ -41,6 +41,7 @@ async def crypto(message):
   - NDQ: NASDAQ, 100 entreprise coté en bourse au Etats-Unis
 
   - BTCUSD: Bitcoin / Dollard
+  - BTCEUR: Bitcoin / Euro
   - ETHUSD: Etherum / Dollard
   - BNBUSD: Binance coin / Dollard
 
@@ -71,10 +72,58 @@ async def indicateurs(message):
   
 ```
 """)
+    
+@client.command(name="tf")
+async def time_frame(message):
+    await message.channel.send("""
+```markdown
+# Liste des unitées de temps:
+
+  - 1m: 1 minute
+  - 3m: 3 minutes
+  - 5m: 5 minutes
+  - 15m: 15 minutes
+  - 30m: 30 minutes
+  - 45m: 45 minutes
+  - 1h: 1 heure
+  - 2h: 2 heures
+  - 3h: 3 heures
+  - 4h: 4 heures
+  - 1d: 1 journée
+  - 1w: 1 semaine
+  - 1m: 1 mois
   
+```
+""")
   
   
 
+
+
+@client.command(name="plot")
+async def plot(message, crypto, indicateur):
+  # Creation d'un channel perso pour envoyer les graphiques.
+  guild = message.guild
+  name = str(message.author) + "_plots"
+  is_already_create = False
+  
+  for channel in guild.channels:
+    if channel.name == name:
+      is_already_create = True
+
+  if is_already_create == False:
+    overwrites = { # définition des permissions.
+      guild.default_role: discord.PermissionOverwrite(read_messages=False),
+      guild.me: discord.PermissionOverwrite(read_messages=True),
+      message.author: discord.PermissionOverwrite(read_messages=True)
+    }
+    channel = await guild.create_text_channel(name, overwrites=overwrites)
+    await message.send(f"Vous pouvez retrouver vos graphiques dans le salon textuel {name[0].upper() + name[1:]}")
+  
+  # Envoie du graphique fini dans le channel correspondant.
+  await channel.send(f"Voici un graphique de {crypto.upper()} avec le {indicateur.upper()}.")
+
+# Test de commande -----------------------------------------------------------------------------------
 @client.command(name="delete")
 async def delete(message):
   # await message.send(message.guild.me)
@@ -100,26 +149,8 @@ async def test(message, *args):
 @client.command(name="img")
 async def test(message):
   await message.channel.send(file=discord.File('img.png'))
-
-@client.command(name="plot")
-async def plot(message, crypto, indicateur):
-  # Creation d'un channel perso pour envoyer les graphiques. ---------------------------
-  guild = message.guild
-  name = str(message.author) + "_plots"
-  is_already_create = False
   
-  for channel in message.guild.channels:
-    if channel.name == name:
-      # await message.send(f"The channel {name} is already instance")
-      is_already_create = True
-
-  if is_already_create == False:
-    await guild.create_text_channel(name)
-    await message.send(f"Vous pouvez retrouver le vos graphhiques dand le channel {name.upper()}")
   
-  # Envoie du graphique fini. -----------------------------------------------------
-  await message.channel.send(f"Voici un graphique de {crypto} avec le {indicateur}.")
-
 # Events ---------------------------------------------------------------------------------------------------------------------------------
 @client.event
 async def on_ready():
