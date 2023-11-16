@@ -1,2 +1,5 @@
 tvdatafeed==2.1.0
 pandas==2.0.3
+discord==2.3.2
+tvdatafeed==2.1.0
+ta==0.10.2

@@ -137,15 +137,15 @@ async def plot(message, val, ind, tf):
   # Recupération de l'unité de temps
   time_frame = utils.get_time_frame(tf=tf, Interval=Interval)
   # Récupération des données et mise en forme.
-  crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"], interval=Interval.in_daily, n_bars=10_000)
+  crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"].upper(), interval=Interval.in_daily, n_bars=10_000)
   df = pd.DataFrame(crypto)
   del df['symbol']
-  df = utils.get_indicator(df=df, ind=ind)
+  df = utils.get_indicator(df=df, ind=ind.lower())
   
   # Création du graphique
   
   # Envoie du graphique fini dans le channel correspondant.
-  await channel.send(f"Voici un graphique de {val.upper()} avec le {ind.upper()} sur {tf}.")
+  await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
 
 # Test de commande -----------------------------------------------------------------------------------
 @client.command(name="delete")
@@ -197,8 +197,8 @@ async def on_message(message):
   if message.author == client.user:
     return
 
-  # On gère les contenue des messages
-  message.content = message.content.lower()
+  # # On gère les contenue des messages
+  # message.content = message.content.lower()
 
   if message.content.startswith("hello"):
     await message.channel.send("Hello")
