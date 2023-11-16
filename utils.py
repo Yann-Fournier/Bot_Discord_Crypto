@@ -1,4 +1,6 @@
 import ta
+import mplfinance as mpf
+import matplotlib.pyplot as plt
 
 def get_time_frame(tf, Interval):
     match tf:
@@ -48,38 +50,17 @@ def get_indicator(df, ind):
             df["ma_band"] = bol_band.bollinger_mavg()
     return df
 
-def create_plot(df):
-    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
-    fig = mpf.figure(1, figsize=(20, 15), style=s) 
+def create_plot(df, ind):
+    style = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
+    fig = mpf.figure(2, figsize=(20, 15), style=style)
     df_plot = df.copy().iloc[-150:]
-
-    print("create plot")
+    ax1 = fig.add_subplot(2,1,1)
+    ax2 = fig.add_subplot(2,1,2, sharex=ax1)
+    ap0 = [
+        mpf.make_addplot(df_plot["rsi"], color='green', panel=0, title="rsi",ylabel='Points', ax=ax2)
+    ]
+    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0, savefig='graph.png')
+    ax1.yaxis.set_label_position('left')
+    ax1.yaxis.tick_left()
+    fig.subplots_adjust(hspace=0.3)
     
-
-
-
-
-# def plot_top_bottom(df, indicator_name, start_index=100, data_to_show=150):
-#     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
-#     fig = mpf.figure(1, figsize=(20, 15), style=s) 
-#     df_plot = df.copy().iloc[-data_to_show:]
-#     ax1 = fig.add_subplot(2,1,1)
-#     ax2 = fig.add_subplot(2,1,2, sharex=ax1)
-#     ap0 = [
-#         mpf.make_addplot(df_plot[indicator_name], color='green', panel=0, title=indicator_name, ax=ax2),
-#     ]
-#     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
-#     fig.subplots_adjust(hspace=0.2)
-#     # ax1.tick_params(labelbottom=False)
-#     ax2.tick_params(labelbottom=False)
-#     ax1.yaxis.set_label_position('left')
-#     ax1.yaxis.tick_left()
-#     index_top_close = df_plot.loc[df_plot["close_top"] == 1]["iloc"]
-#     index_bottom_close = df_plot.loc[df_plot["close_bottom"] == 1]["iloc"]
-#     index_top_indicator = df_plot.loc[df_plot[indicator_name+"_top"] == 1]["iloc"]
-#     index_bottom_indicator = df_plot.loc[df_plot[indicator_name+"_bottom"] == 1]["iloc"]
-#     ax1.scatter(x=(index_top_close - df_plot.iloc[0]["iloc"]), y=df.iloc[index_top_close]["close"], s=200, c='orange', zorder=2)
-#     ax1.scatter(x=(index_bottom_close - df_plot.iloc[0]["iloc"]), y=df.iloc[index_bottom_close]["close"], s=200, c='blue', zorder=2)
-#     ax2.scatter(x=(index_top_indicator - df_plot.iloc[0]["iloc"]), y=df.iloc[index_top_indicator][indicator_name], s=200, c='orange', zorder=2)
-#     ax2.scatter(x=(index_bottom_indicator - df_plot.iloc[0]["iloc"]), y=df.iloc[index_bottom_indicator][indicator_name], s=200, c='blue', zorder=2)
-#     plt.show()

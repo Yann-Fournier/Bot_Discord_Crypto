@@ -143,9 +143,13 @@ async def plot(message, val, ind, tf):
   df = utils.get_indicator(df=df, ind=ind.lower())
   
   # Création du graphique
-  
+  utils.create_plot(df, ind.lower())
+
   # Envoie du graphique fini dans le channel correspondant.
   await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
+  await channel.send(file=discord.File('graph.png'))
+  os.remove('graph.png')
+  
 
 # Test de commande -----------------------------------------------------------------------------------
 @client.command(name="delete")
