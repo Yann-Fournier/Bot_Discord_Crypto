@@ -117,10 +117,11 @@ async def plot(message, crypto, indicateur):
       guild.me: discord.PermissionOverwrite(read_messages=True),
       message.author: discord.PermissionOverwrite(read_messages=True)
     }
-    channel = await guild.create_text_channel(name, overwrites=overwrites)
+    await guild.create_text_channel(name, overwrites=overwrites)
     await message.send(f"Vous pouvez retrouver vos graphiques dans le salon textuel {name[0].upper() + name[1:]}")
   
   # Envoie du graphique fini dans le channel correspondant.
+  channel = discord.utils.get(guild.channels, name=name)
   await channel.send(f"Voici un graphique de {crypto.upper()} avec le {indicateur.upper()}.")
 
 # Test de commande -----------------------------------------------------------------------------------
