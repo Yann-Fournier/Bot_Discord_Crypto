@@ -3,6 +3,11 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv , find_dotenv
 from tvDatafeed import TvDatafeed, Interval
+import pandas as pd
+import ta
+import utils
+
+tv = TvDatafeed() # création de la connection à Tradingview.
 
 # Récuper le .env et stocker le token dans une variable
 load_dotenv(find_dotenv())
@@ -30,7 +35,7 @@ async def commandes(message):
 ```
 """)
     
-@client.command(name="val",)
+@client.command(name="val")
 async def crypto(message):
     await message.channel.send("""
 ```markdown
@@ -40,10 +45,10 @@ async def crypto(message):
   - CAC: CAC40, les 40 plus grandes entreprises françaises
   - NDQ: NASDAQ, 100 entreprise coté en bourse au Etats-Unis
 
-  - BTCUSD: Bitcoin / Dollard
+  - BTCUSD: Bitcoin / U.S Dollard
   - BTCEUR: Bitcoin / Euro
-  - ETHUSD: Etherum / Dollard
-  - BNBUSD: Binance coin / Dollard
+  - ETHUSD: Etherum / U.S Dollard
+  - BNBUSD: Binance coin / U.S Dollard
 
   - AAPL: Apple
   - TSLA: Tesla
@@ -66,9 +71,10 @@ async def indicateurs(message):
 ```markdown
 # Liste des principaux indicateurs:
 
-  - RSI: Relative Strength Index
-  - STOCH: Stochastique %K
-  - MACD: Convergence Divergence Moyenne Mobile (macd, macd_signal, macd_diff(bar-plot))
+  - rsi: Relative Strength Index
+  - stoch: Stochastique %K
+  - macd: Convergence Divergence Moyenne Mobile (macd, macd_signal, macd_diff(bar-plot))
+  - bol: Bollinger Bands
   
 ```
 """)
@@ -91,7 +97,7 @@ async def time_frame(message):
   - 4h: 4 heures
   - 1d: 1 journée
   - 1w: 1 semaine
-  - 1m: 1 mois
+  - 1M: 1 mois
   
 ```
 """)
@@ -101,18 +107,21 @@ async def time_frame(message):
 
 
 @client.command(name="plot")
-async def plot(message, crypto, indicateur):
+async def plot(message, val, ind, tf):
   # Creation d'un channel perso pour envoyer les graphiques.
   guild = message.guild
   name = str(message.author) + "_plots"
   is_already_create = False
   
+  # On regarde si l'auteur du message possède déja un channel privé pour ces graphiques.
+  # pour ne pas polluer le channel général.
   for channel in guild.channels:
     if channel.name == name:
       is_already_create = True
 
+  # Sinon on lui en créer un
   if is_already_create == False:
-    overwrites = { # définition des permissions.
+    overwrites = { # définition des permissions. faire en sort que ce channel soit privé.
       guild.default_role: discord.PermissionOverwrite(read_messages=False),
       guild.me: discord.PermissionOverwrite(read_messages=True),
       message.author: discord.PermissionOverwrite(read_messages=True)
@@ -120,9 +129,23 @@ async def plot(message, crypto, indicateur):
     await guild.create_text_channel(name, overwrites=overwrites)
     await message.send(f"Vous pouvez retrouver vos graphiques dans le salon textuel {name[0].upper() + name[1:]}")
   
+  channel = discord.utils.get(guild.channels, name=name) # Récupération du channel lié à l'auteur du message
+  await channel.send(f"Je suis en train de créer votre graphique")
+  
+  # récupération de l'echange
+  data = tv.search_symbol(text=val)
+  # Recupération de l'unité de temps
+  time_frame = utils.get_time_frame(tf=tf, Interval=Interval)
+  # Récupération des données et mise en forme.
+  crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"], interval=Interval.in_daily, n_bars=10_000)
+  df = pd.DataFrame(crypto)
+  del df['symbol']
+  df = utils.get_indicator(df=df, ind=ind)
+  
+  # Création du graphique
+  
   # Envoie du graphique fini dans le channel correspondant.
-  channel = discord.utils.get(guild.channels, name=name)
-  await channel.send(f"Voici un graphique de {crypto.upper()} avec le {indicateur.upper()}.")
+  await channel.send(f"Voici un graphique de {val.upper()} avec le {ind.upper()} sur {tf}.")
 
 # Test de commande -----------------------------------------------------------------------------------
 @client.command(name="delete")
