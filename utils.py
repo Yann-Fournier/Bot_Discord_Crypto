@@ -1,6 +1,7 @@
 import ta
 import mplfinance as mpf
 import matplotlib.pyplot as plt
+import time
 
 def get_time_frame(tf, Interval):
     match tf:
@@ -50,17 +51,69 @@ def get_indicator(df, ind):
             df["ma_band"] = bol_band.bollinger_mavg()
     return df
 
-def create_plot(df, ind):
+def create_plot(df, ind, pic_name):
+    match ind:
+        case "rsi":
+            plot_rsi(df=df, pic_name=pic_name)
+        case "macd":
+            plot_macd(df=df, pic_name=pic_name)
+        case "stoch":
+            plot_stoch(df=df, pic_name=pic_name)
+        case "boll":
+            plot_boll(df=df, pic_name=pic_name)
+        case "mm":
+            plot_mm(df=df, pic_name=pic_name)
+
+def plot_rsi(df, pic_name):
+    df_plot = df.copy().iloc[-150:]
     style = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
     fig = mpf.figure(2, figsize=(20, 15), style=style)
-    df_plot = df.copy().iloc[-150:]
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2, sharex=ax1)
     ap0 = [
         mpf.make_addplot(df_plot["rsi"], color='green', panel=0, title="rsi",ylabel='Points', ax=ax2)
     ]
-    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0, savefig='graph.png')
+    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
     ax1.yaxis.tick_left()
-    fig.subplots_adjust(hspace=0.3)
+    plt.savefig(pic_name)
+
+def plot_macd(df, pic_name):
+    df_plot = df.copy().iloc[-150:]
+    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
+    fig = mpf.figure(2, figsize=(20, 15), style=s)
+    ax1 = fig.add_subplot(2,1,1)
+    ax2 = fig.add_subplot(2,1,2, sharex=ax1)
+    ap0 = [
+        mpf.make_addplot(df_plot["macd"]/10, color='blue', panel=0, title="MACD", ylabel='Points', ax=ax2),
+        mpf.make_addplot(df_plot["macd_signal"]/10, color='orange', panel=0, ax=ax2),
+        mpf.make_addplot(df_plot["macd_diff"]/10, panel=0, ax=ax2, type='bar', color='lightblue')
+    ]
+    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
+    ax1.yaxis.set_label_position('left')
+    plt.show()
+
     
+def plot_stoch(df, pic_name):
+    df_plot = df.copy().iloc[-150:]
+    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
+    fig = mpf.figure(2, figsize=(20, 15), style=s)
+    ax1 = fig.add_subplot(2,1,1)
+    ax2 = fig.add_subplot(2,1,2, sharex=ax1)
+    ap0 = [
+        mpf.make_addplot(df_plot["stoch_%K"], color='blue', panel=0, title="Stochastic", ylabel='Points', ax=ax2),
+        mpf.make_addplot(df_plot["stoch_%D"], color='orange', panel=0, ax=ax2)
+    ]
+    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
+    ax1.yaxis.set_label_position('left')
+    plt.savefig(pic_name)
+
+    
+def plot_boll(df, pic_name):
+    df_plot = df.copy().iloc[-150:]
+    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
+
+    
+def plot_mm(df, pic_name):
+    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
+    mpf.plot(df_plot, mav=(10, 20), type='candle', style=s, figsize=(20, 10), savefig=pic_name)

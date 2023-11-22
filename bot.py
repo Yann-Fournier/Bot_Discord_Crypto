@@ -6,6 +6,8 @@ from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
 import ta
 import utils
+import mplfinance as mpf
+import matplotlib.pyplot as plt
 
 tv = TvDatafeed() # création de la connection à Tradingview.
 
@@ -74,7 +76,8 @@ async def indicateurs(message):
   - rsi: Relative Strength Index
   - stoch: Stochastique %K
   - macd: Convergence Divergence Moyenne Mobile (macd, macd_signal, macd_diff(bar-plot))
-  - bol: Bollinger Bands
+  - boll: Bollinger Bands
+  - mm: moyenne mobile
   
 ```
 """)
@@ -143,12 +146,13 @@ async def plot(message, val, ind, tf):
   df = utils.get_indicator(df=df, ind=ind.lower())
   
   # Création du graphique
-  utils.create_plot(df, ind.lower())
+  utils.create_plot(df, ind.lower(), str(message.author) + "_plot.png")
 
   # Envoie du graphique fini dans le channel correspondant.
   await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
-  await channel.send(file=discord.File('graph.png'))
-  os.remove('graph.png')
+  await channel.send(file=discord.File(str(message.author) + "_plot.png"))
+  os.remove(str(message.author) + "_plot.png")
+
   
 
 # Test de commande -----------------------------------------------------------------------------------
