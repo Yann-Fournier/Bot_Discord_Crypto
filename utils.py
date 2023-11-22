@@ -32,7 +32,6 @@ def get_time_frame(tf, Interval):
         case "1M":
             return Interval.in_monthly
 
-   
 def get_indicator(df, ind):
     match ind:
         case "rsi":
@@ -77,7 +76,7 @@ def plot_rsi(df, pic_name):
     ax1.yaxis.set_label_position('left')
     ax1.yaxis.tick_left()
     plt.savefig(pic_name)
-
+    
 def plot_macd(df, pic_name):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
@@ -91,9 +90,8 @@ def plot_macd(df, pic_name):
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
-    plt.show()
-
-    
+    plt.savefig(pic_name)
+  
 def plot_stoch(df, pic_name):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
@@ -108,11 +106,19 @@ def plot_stoch(df, pic_name):
     ax1.yaxis.set_label_position('left')
     plt.savefig(pic_name)
 
-    
 def plot_boll(df, pic_name):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
-
+    fig = mpf.figure(2, figsize=(20, 15), style=s)
+    ax1 = fig.add_subplot(2,1,1)
+    ap0 = [
+        mpf.make_addplot(df_plot["lower_band"], color='blue', panel=0, title="Bollinger Bands", ylabel='Points', ax=ax1),
+        mpf.make_addplot(df_plot["higher_band"], color='blue', panel=0, ax=ax1),
+        mpf.make_addplot(df_plot["ma_band"], color='orange', panel=0, ax=ax1)
+    ]
+    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
+    ax1.yaxis.set_label_position('left')
+    plt.savefig(pic_name)
     
 def plot_mm(df, pic_name):
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
