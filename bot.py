@@ -4,10 +4,7 @@ import os
 from dotenv import load_dotenv , find_dotenv
 from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
-import ta
 import utils
-import mplfinance as mpf
-import matplotlib.pyplot as plt
 
 tv = TvDatafeed() # création de la connection à Tradingview.
 
@@ -77,7 +74,7 @@ async def indicateurs(message):
   - stoch: Stochastique %K
   - macd: Convergence Divergence Moyenne Mobile (macd, macd_signal, macd_diff(bar-plot))
   - boll: Bollinger Bands
-  - mm: moyenne mobile
+  - mm: moyenne mobile (moving average)
   
 ```
 """)
@@ -104,10 +101,6 @@ async def time_frame(message):
   
 ```
 """)
-  
-  
-
-
 
 @client.command(name="plot")
 async def plot(message, val, ind, tf):
@@ -140,7 +133,7 @@ async def plot(message, val, ind, tf):
   # Recupération de l'unité de temps
   time_frame = utils.get_time_frame(tf=tf, Interval=Interval)
   # Récupération des données et mise en forme.
-  crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"].upper(), interval=Interval.in_daily, n_bars=10_000)
+  crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"].upper(), interval=time_frame, n_bars=10_000)
   df = pd.DataFrame(crypto)
   del df['symbol']
   df = utils.get_indicator(df=df, ind=ind.lower())

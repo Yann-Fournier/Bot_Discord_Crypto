@@ -1,7 +1,6 @@
 import ta
 import mplfinance as mpf
 import matplotlib.pyplot as plt
-import time
 
 def get_time_frame(tf, Interval):
     match tf:
@@ -44,7 +43,7 @@ def get_indicator(df, ind):
             df["stoch_%K"] = ta.momentum.stoch(high=df["high"], low=df["low"], close=df["close"], window= 14,smooth_window=3, fillna=False)
             df["stoch_%D"] = df['Stoch_%K'].rolling(3).mean()
         case "bol":
-            bol_band = ta.volatility.BollingerBands(close=df["close"], window=100, window_dev=2.25)
+            bol_band = ta.volatility.BollingerBands(close=df["close"], window=20, window_dev=2.25)
             df["lower_band"] = bol_band.bollinger_lband()
             df["higher_band"] = bol_band.bollinger_hband()
             df["ma_band"] = bol_band.bollinger_mavg()
@@ -65,16 +64,20 @@ def create_plot(df, ind, pic_name):
 
 def plot_rsi(df, pic_name):
     df_plot = df.copy().iloc[-150:]
-    style = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
-    fig = mpf.figure(2, figsize=(20, 15), style=style)
+    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
+    fig = mpf.figure(2, figsize=(20, 15), style=s)
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2, sharex=ax1)
     ap0 = [
-        mpf.make_addplot(df_plot["rsi"], color='green', panel=0, title="rsi",ylabel='Points', ax=ax2)
+        mpf.make_addplot(df_plot["rsi"], color='purple', panel=0, title="rsi", ylabel='Points', ax=ax2),
+        mpf.make_addplot(df_plot["rsima"], color='yellow', panel=0,ax=ax2)
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
     ax1.yaxis.tick_left()
+    ax2.axhline(30, color='black', linestyle='--')
+    ax2.axhline(50, color='black', linestyle='--')
+    ax2.axhline(70, color='black', linestyle='--')
     plt.savefig(pic_name)
     
 def plot_macd(df, pic_name):
@@ -90,6 +93,8 @@ def plot_macd(df, pic_name):
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
+    ax1.yaxis.tick_left()
+    ax2.axhline(0, color='black', linestyle='--')
     plt.savefig(pic_name)
   
 def plot_stoch(df, pic_name):
@@ -104,6 +109,10 @@ def plot_stoch(df, pic_name):
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
+    ax1.yaxis.tick_left()
+    ax2.axhline(20, color='black', linestyle='--')
+    ax2.axhline(50, color='black', linestyle='--')
+    ax2.axhline(80, color='black', linestyle='--')
     plt.savefig(pic_name)
 
 def plot_boll(df, pic_name):
@@ -112,14 +121,16 @@ def plot_boll(df, pic_name):
     fig = mpf.figure(2, figsize=(20, 15), style=s)
     ax1 = fig.add_subplot(2,1,1)
     ap0 = [
-        mpf.make_addplot(df_plot["lower_band"], color='blue', panel=0, title="Bollinger Bands", ylabel='Points', ax=ax1),
+        mpf.make_addplot(df_plot["lower_band"], color='blue', panel=0, title="Bollinger Bands", ax=ax1),
         mpf.make_addplot(df_plot["higher_band"], color='blue', panel=0, ax=ax1),
         mpf.make_addplot(df_plot["ma_band"], color='orange', panel=0, ax=ax1)
-    ]
+    ]     
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
+    ax1.yaxis.tick_left()
     plt.savefig(pic_name)
     
 def plot_mm(df, pic_name):
+    df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
-    mpf.plot(df_plot, mav=(10, 20), type='candle', style=s, figsize=(20, 10), savefig=pic_name)
+    mpf.plot(df_plot, mav=(9, 21), type='candle', style=s, figsize=(20, 10), savefig=pic_name)
