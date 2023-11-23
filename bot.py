@@ -25,6 +25,7 @@ async def commandes(message):
   - $cmd: renvoie la liste des commandes
   - $val: renvoie la liste des valeurs principales.
   - $ind: renvoie la liste des principaux indicateurs:
+  - $tf: renvoie la liste des périodes disponibles
   
   
   - $test arg1: renvoie "test" et l'argument placer en paramètre

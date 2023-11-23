@@ -48,6 +48,9 @@ def get_indicator(df, ind):
             df["lower_band"] = bol_band.bollinger_lband()
             df["higher_band"] = bol_band.bollinger_hband()
             df["ma_band"] = bol_band.bollinger_mavg()
+        case "mm":
+            df["sma9"] = df['close'].rolling(9).mean()
+            df["sma21"] = df['close'].rolling(21).mean()
     return df
 
 def create_plot(df, ind, pic_name):
@@ -136,7 +139,11 @@ def plot_mm(df, pic_name):
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
     fig5 = mpf.figure(5, figsize=(20, 15), style=s)
     ax1 = fig5.add_subplot(2,1,1)
-    mpf.plot(df_plot, type='candle', ax=ax1, mav=(9, 21))
+    ap0 = [
+        mpf.make_addplot(df_plot["sma9"], color='blue', panel=0, title="Moyenne Mobile", ylabel='Points', ax=ax1),
+        mpf.make_addplot(df_plot["sma21"], color='orange', panel=0, ax=ax1),
+    ]     
+    mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
     ax1.yaxis.tick_left()
     plt.savefig(pic_name)
