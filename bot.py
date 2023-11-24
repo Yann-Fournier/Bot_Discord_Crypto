@@ -140,7 +140,7 @@ async def plot(message, val, ind, tf):
   df = utils.get_indicator(df=df, ind=ind.lower())
   
   # Création du graphique
-  utils.create_plot(df, ind.lower(), str(message.author) + "_plot.png")
+  utils.create_plot(df, ind.lower(), str(message.author) + "_plot.png", val=val.upper())
 
   # Envoie du graphique fini dans le channel correspondant.
   await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")

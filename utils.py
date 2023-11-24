@@ -53,27 +53,27 @@ def get_indicator(df, ind):
             df["sma21"] = df['close'].rolling(21).mean()
     return df
 
-def create_plot(df, ind, pic_name):
+def create_plot(df, ind, pic_name, val):
     match ind:
         case "rsi":
-            plot_rsi(df=df, pic_name=pic_name)
+            plot_rsi(df=df, pic_name=pic_name, val=val)
         case "macd":
-            plot_macd(df=df, pic_name=pic_name)
+            plot_macd(df=df, pic_name=pic_name, val=val)
         case "stoch":
-            plot_stoch(df=df, pic_name=pic_name)
+            plot_stoch(df=df, pic_name=pic_name, val=val)
         case "boll":
-            plot_boll(df=df, pic_name=pic_name)
+            plot_boll(df=df, pic_name=pic_name, val=val)
         case "mm":
-            plot_mm(df=df, pic_name=pic_name)
+            plot_mm(df=df, pic_name=pic_name, val=val)
 
-def plot_rsi(df, pic_name):
+def plot_rsi(df, pic_name, val):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
     fig1 = mpf.figure(1, figsize=(20, 15), style=s)
-    ax1 = fig1.add_subplot(2,1,1)
-    ax2 = fig1.add_subplot(2,1,2, sharex=ax1)
+    ax1 = fig1.add_subplot(2,1,1,title=val)
+    ax2 = fig1.add_subplot(2,1,2, sharex=ax1, title="RSI")
     ap0 = [
-        mpf.make_addplot(df_plot["rsi"], color='purple', panel=0, title="rsi", ylabel='Points', ax=ax2),
+        mpf.make_addplot(df_plot["rsi"], color='purple', panel=0, ylabel='Points', ax=ax2),
         mpf.make_addplot(df_plot["rsima"], color='yellow', panel=0,ax=ax2)
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
@@ -84,14 +84,14 @@ def plot_rsi(df, pic_name):
     ax2.axhline(70, color='black', linestyle='--')
     plt.savefig(pic_name)
     
-def plot_macd(df, pic_name):
+def plot_macd(df, pic_name, val):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
     fig2 = mpf.figure(2, figsize=(20, 15), style=s)
-    ax1 = fig2.add_subplot(2,1,1)
-    ax2 = fig2.add_subplot(2,1,2, sharex=ax1)
+    ax1 = fig2.add_subplot(2,1,1, title=val)
+    ax2 = fig2.add_subplot(2,1,2, sharex=ax1, title="MACD")
     ap0 = [
-        mpf.make_addplot(df_plot["macd"]/10, color='blue', panel=0, title="MACD", ylabel='Points', ax=ax2),
+        mpf.make_addplot(df_plot["macd"]/10, color='blue', panel=0, ylabel='Points', ax=ax2),
         mpf.make_addplot(df_plot["macd_signal"]/10, color='orange', panel=0, ax=ax2),
         mpf.make_addplot(df_plot["macd_diff"]/10, panel=0, ax=ax2, type='bar', color='lightblue')
     ]
@@ -101,14 +101,14 @@ def plot_macd(df, pic_name):
     ax2.axhline(0, color='black', linestyle='--')
     plt.savefig(pic_name)
   
-def plot_stoch(df, pic_name):
+def plot_stoch(df, pic_name, val):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
     fig3 = mpf.figure(3, figsize=(20, 15), style=s)
-    ax1 = fig3.add_subplot(2,1,1)
-    ax2 = fig3.add_subplot(2,1,2, sharex=ax1)
+    ax1 = fig3.add_subplot(2,1,1, title=val)
+    ax2 = fig3.add_subplot(2,1,2, sharex=ax1, title="Stochastic")
     ap0 = [
-        mpf.make_addplot(df_plot["stoch_%K"], color='blue', panel=0, title="Stochastic", ylabel='Points', ax=ax2),
+        mpf.make_addplot(df_plot["stoch_%K"], color='blue', panel=0, ylabel='Points', ax=ax2),
         mpf.make_addplot(df_plot["stoch_%D"], color='orange', panel=0, ax=ax2)
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
@@ -119,28 +119,28 @@ def plot_stoch(df, pic_name):
     ax2.axhline(80, color='black', linestyle='--')
     plt.savefig(pic_name)
 
-def plot_boll(df, pic_name):
+def plot_boll(df, pic_name, val):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
     fig4 = mpf.figure(4, figsize=(20, 15), style=s)
-    ax1 = fig4.add_subplot(2,1,1)
+    ax1 = fig4.add_subplot(2,1,1, title=val + " / Bollinger Bands")
     ap0 = [
-        mpf.make_addplot(df_plot["lower_band"], color='blue', panel=0, title="Bollinger Bands", ax=ax1),
+        mpf.make_addplot(df_plot["lower_band"], color='blue', panel=0, ax=ax1),
         mpf.make_addplot(df_plot["higher_band"], color='blue', panel=0, ax=ax1),
         mpf.make_addplot(df_plot["ma_band"], color='orange', panel=0, ax=ax1)
-    ]     
+    ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')
     ax1.yaxis.tick_left()
     plt.savefig(pic_name)
-    
-def plot_mm(df, pic_name):
+
+def plot_mm(df, pic_name, val):
     df_plot = df.copy().iloc[-150:]
     s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 10})
     fig5 = mpf.figure(5, figsize=(20, 15), style=s)
-    ax1 = fig5.add_subplot(2,1,1)
+    ax1 = fig5.add_subplot(2,1,1, title=val + " / Moyenne Mobile")
     ap0 = [
-        mpf.make_addplot(df_plot["sma9"], color='blue', panel=0, title="Moyenne Mobile", ylabel='Points', ax=ax1),
+        mpf.make_addplot(df_plot["sma9"], color='blue', panel=0, ylabel='Points', ax=ax1),
         mpf.make_addplot(df_plot["sma21"], color='orange', panel=0, ax=ax1),
     ]     
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
