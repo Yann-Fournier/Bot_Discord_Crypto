@@ -14,9 +14,13 @@ historique = liste.ChainedList()
 hist_users = hashmap.HashMap(10) # Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
 # discussion = arbre.
 
-hist_users.add_key_value("ryulgc", liste.ChainedList())
-hist_users.add_key_value("patchouf", liste.ChainedList())
-hist_users.add_key_value("koliwki", liste.ChainedList())
+liste_chainée_ryulgc = liste.ChainedList()
+liste_chainée_patchouf = liste.ChainedList()
+liste_chainée_koliwki = liste.ChainedList()
+hist_users.add_key_value("ryulgc", liste_chainée_ryulgc)
+hist_users.add_key_value("patchouf", liste_chainée_patchouf)
+hist_users.add_key_value("koliwki", liste_chainée_koliwki)
+print(hist_users)
 
 
 tv = TvDatafeed() # création de la connection à Tradingview.
@@ -32,10 +36,12 @@ client = commands.Bot(command_prefix="$", intents = intents)
 @client.command(name="cmd")
 async def commandes(message):
   historique.append("$cmd")
-  print(str(message.author))
-  perso = hist_users.get(str(message.author))
-  perso.append("$cmd")
-  hist_users.add_key_value(str(message.author), perso)
+  hist_perso = hist_users.get(str(message.author))
+  print("hist_perso: ", hist_perso)
+  if hist_perso is None:
+    hist_perso = liste.ChainedList()
+    hist_perso.append("$cmd")
+  hist_users.add_key_value(str(message.author), hist_perso)
   print(hist_users)
   # print(historique)
   await message.channel.send("""
@@ -209,7 +215,8 @@ async def on_typing(channel, user, when):
 @client.event
 async def on_member_join(member):
   general_channel = client.get_channel(1044900412551073832)
-  hist_users.add_key_value(str(member.name), liste.ChainedList()) # création d'un historique perso pour chaque nouvel arrivant.
+  liste_chainée = liste.ChainedList()
+  hist_users.add_key_value(str(member.name), liste_chainée) # création d'un historique perso pour chaque nouvel arrivant.
   await general_channel.send("Bienvenue sur le serveur ! "+ member.name)
 
 @client.event
