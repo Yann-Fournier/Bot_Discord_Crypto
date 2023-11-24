@@ -1,10 +1,17 @@
+import sys
+sys.path.append('./')
 import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv , find_dotenv
 from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
-import utils
+from outils import arbre, graph, hashmap, liste # mes propres fichiers
+
+# Initialisation des objets*
+historique = liste.ChainedList()
+hist_users = hashmap.HashMap(10) # Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
+# discussion = arbre.
 
 tv = TvDatafeed() # création de la connection à Tradingview.
 
@@ -129,23 +136,29 @@ async def plot(message, val, ind, tf):
   channel = discord.utils.get(guild.channels, name=name) # Récupération du channel lié à l'auteur du message
   await channel.send(f"Je suis en train de créer votre graphique")
   
-  # récupération de l'echange
-  data = tv.search_symbol(text=val)
-  # Recupération de l'unité de temps
-  time_frame = utils.get_time_frame(tf=tf, Interval=Interval)
-  # Récupération des données et mise en forme.
-  crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"].upper(), interval=time_frame, n_bars=10_000)
-  df = pd.DataFrame(crypto)
-  del df['symbol']
-  df = utils.get_indicator(df=df, ind=ind.lower())
+  try:
+    # récupération de l'echange
+    data = tv.search_symbol(text=val)
+    # Recupération de l'unité de temps
+    time_frame = graph.get_time_frame(tf=tf, Interval=Interval)
+    # Récupération des données et mise en forme.
+    crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"].upper(), interval=time_frame, n_bars=10_000)
+    df = pd.DataFrame(crypto)
+    del df['symbol']
+    df = graph.get_indicator(df=df, ind=ind.lower())
+  except:
+    await channel.send("L'un des paramètres entrer n'est pas correct!")
   
-  # Création du graphique
-  utils.create_plot(df, ind.lower(), str(message.author) + "_plot.png", val=val.upper())
+  try:
+    # Création du graphique
+    graph.create_plot(df, ind.lower(), str(message.author) + "_plot.png", val=val.upper())
 
-  # Envoie du graphique fini dans le channel correspondant.
-  await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
-  await channel.send(file=discord.File(str(message.author) + "_plot.png"))
-  os.remove(str(message.author) + "_plot.png")
+    # Envoie du graphique fini dans le channel correspondant.
+    await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
+    await channel.send(file=discord.File(str(message.author) + "_plot.png"))
+    os.remove(str(message.author) + "_plot.png")
+  except:
+    print("problème avec le graphique")
 
   
 
@@ -189,6 +202,7 @@ async def on_typing(channel, user, when):
 @client.event
 async def on_member_join(member):
     general_channel = client.get_channel(1044900412551073832)
+    hist_users.add_key_value(member.name, liste.ChainedList()) # création d'un historique perso pour chaque nouvel arrivant.
     await general_channel.send("Bienvenue sur le serveur ! "+ member.name)
 
 @client.event
