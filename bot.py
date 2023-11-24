@@ -8,10 +8,16 @@ from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
 from outils import arbre, graph, hashmap, liste # mes propres fichiers
 
-# Initialisation des objets*
+# Initialisation ----------------------------------------------------------------------------------------------------------------------
+# Objets
 historique = liste.ChainedList()
 hist_users = hashmap.HashMap(10) # Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
 # discussion = arbre.
+
+hist_users.add_key_value("ryulgc", liste.ChainedList())
+hist_users.add_key_value("patchouf", liste.ChainedList())
+hist_users.add_key_value("koliwki", liste.ChainedList())
+
 
 tv = TvDatafeed() # création de la connection à Tradingview.
 
@@ -25,26 +31,35 @@ client = commands.Bot(command_prefix="$", intents = intents)
 # Commandes -------------------------------------------------------------------------------------------------------------------------
 @client.command(name="cmd")
 async def commandes(message):
-    await message.channel.send("""
+  historique.append("$cmd")
+  print(str(message.author))
+  perso = hist_users.get(str(message.author))
+  perso.append("$cmd")
+  hist_users.add_key_value(str(message.author), perso)
+  print(hist_users)
+  # print(historique)
+  await message.channel.send("""
 ```markdown
 # Liste des commandes:
 
+  - $last: renvoie la dernière commande entrée
+  - $vider: vide entièrement l'historique des commandes
+  
   - $cmd: renvoie la liste des commandes
+  - $cmd_user: renvoie l'historique des commandes d'un utilisateur $$$$$$$$$
+  
   - $val: renvoie la liste des valeurs principales.
   - $ind: renvoie la liste des principaux indicateurs:
   - $tf: renvoie la liste des périodes disponibles
-  
-  
-  - $test arg1: renvoie "test" et l'argument placer en paramètre
-  - $img: renvoie une image
-  - $plot crypto indicateur: renvoie "Voici un graphique de "crypto" avec l'"indicateur"."
-  
 ```
 """)
     
 @client.command(name="val")
 async def crypto(message):
-    await message.channel.send("""
+  historique.append("$val")
+  print(hist_users.get(str(message.author)))
+  # print(historique)
+  await message.channel.send("""
 ```markdown
 # Liste des principals valeurs:
 
@@ -74,7 +89,9 @@ async def crypto(message):
     
 @client.command(name="ind")
 async def indicateurs(message):
-    await message.channel.send("""
+  historique.append("$ind")
+  # print(historique)
+  await message.channel.send("""
 ```markdown
 # Liste des principaux indicateurs:
 
@@ -89,7 +106,9 @@ async def indicateurs(message):
     
 @client.command(name="tf")
 async def time_frame(message):
-    await message.channel.send("""
+  historique.append("$tf")
+  # print(historique)
+  await message.channel.send("""
 ```markdown
 # Liste des unitées de temps:
 
@@ -109,6 +128,20 @@ async def time_frame(message):
   
 ```
 """)
+
+@client.command(name="last")
+async def last(message):
+  if historique.length == 0:
+    await message.channel.send(f"Aucune commande n'a encore été entrée")
+  else:
+    await message.channel.send(f"Voici la dernière commande entrée par un utilisateur: {historique.get(historique.length - 1)}")
+  historique.append("$last")
+  # print(historique)
+  
+@client.command(name="vider")
+async def vider(message):
+  historique.empty()
+  # print(historique)
 
 @client.command(name="plot")
 async def plot(message, val, ind, tf):
@@ -157,53 +190,27 @@ async def plot(message, val, ind, tf):
     await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
     await channel.send(file=discord.File(str(message.author) + "_plot.png"))
     os.remove(str(message.author) + "_plot.png")
+    
+    # On ajout la commande seulement si elle fonctionne.
+    historique.append("$plot" + " " + val + " " +  ind + " " +  tf)
+    # print(historique)
   except:
     print("problème avec le graphique")
 
-  
-
-# Test de commande -----------------------------------------------------------------------------------
-@client.command(name="delete")
-async def delete(message):
-  # await message.send(message.guild.me)
-  for channel in message.guild.channels:
-    if isinstance(channel, discord.TextChannel):
-      await message.send(f"The channel {channel} is instance")
-      # if channel.permissions_for(message.author).send_messages:
-      #   channel_used = channel
-      #   break
-
-@client.command(name="test")
-async def test(message, *args):
-  await message.channel.send("test")
-  arguments = ', '.join(args)
-  await message.channel.send(f'{len(args)} arguments: {arguments}')
-  await message.channel.send(args)
-  try:
-    await message.channel.send(args[0].upper())
-  except:
-    await message.channel.send("Aucun argument donné")
-
-
-@client.command(name="img")
-async def test(message):
-  await message.channel.send(file=discord.File('img.png'))
-  
-  
 # Events ---------------------------------------------------------------------------------------------------------------------------------
 @client.event
 async def on_ready():
-    print("Le bot est prêt !")
+  print("Le bot est prêt !")
 
 @client.event
 async def on_typing(channel, user, when):
-     await channel.send(user.name+" is typing")
+  await channel.send(user.name+" is typing")
 
 @client.event
 async def on_member_join(member):
-    general_channel = client.get_channel(1044900412551073832)
-    hist_users.add_key_value(member.name, liste.ChainedList()) # création d'un historique perso pour chaque nouvel arrivant.
-    await general_channel.send("Bienvenue sur le serveur ! "+ member.name)
+  general_channel = client.get_channel(1044900412551073832)
+  hist_users.add_key_value(str(member.name), liste.ChainedList()) # création d'un historique perso pour chaque nouvel arrivant.
+  await general_channel.send("Bienvenue sur le serveur ! "+ member.name)
 
 @client.event
 async def on_message(message):

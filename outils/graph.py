@@ -74,7 +74,7 @@ def plot_rsi(df, pic_name, val):
     ax2 = fig1.add_subplot(2,1,2, sharex=ax1, title="RSI")
     ap0 = [
         mpf.make_addplot(df_plot["rsi"], color='purple', panel=0, ylabel='Points', ax=ax2),
-        mpf.make_addplot(df_plot["rsima"], color='yellow', panel=0,ax=ax2)
+        mpf.make_addplot(df_plot["rsima"], color='blue', panel=0,ax=ax2)
     ]
     mpf.plot(df_plot, type='candle', ax=ax1, addplot=ap0)
     ax1.yaxis.set_label_position('left')

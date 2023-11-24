@@ -12,12 +12,18 @@ class ChainedList:
         self.length = 0
     
     def __str__(self):
-        string =  str(self.first_node.data) + " "
+        if self.length == 0:
+            return "Vide"
+        string =  str(self.first_node.data) + ", "
         current_node = self.first_node
         while current_node.next_node is not None:
-            string = string + str(current_node.next_node.data) + " " 
+            string = string + str(current_node.next_node.data) + ", " 
             current_node = current_node.next_node
         return string
+    
+    def empty(self):
+        self.first_node = None
+        self.length = 0
     
     def len(self): # donne le nombre de nodes
         return self.length
@@ -34,7 +40,7 @@ class ChainedList:
         
     def get(self, ind): # cette fonction nous donne la data d'un node précis à l'indice "ind"
         if ind > self.length or ind < 0:
-            return 
+            return
         current_node = self.first_node
         while ind != 0:
             ind -= 1
