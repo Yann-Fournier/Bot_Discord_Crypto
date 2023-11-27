@@ -21,6 +21,16 @@ class ChainedList:
             current_node = current_node.next_node
         return string
     
+    def to_str(self):
+        if self.length == 0:
+            return "Vide"
+        string =  str(self.first_node.data) + ",\n"
+        current_node = self.first_node
+        while current_node.next_node is not None:
+            string = string + str(current_node.next_node.data) + ",\n" 
+            current_node = current_node.next_node
+        return string
+    
     def empty(self):
         self.first_node = None
         self.length = 0

@@ -41,18 +41,18 @@ intents = discord.Intents.all()
 client = commands.Bot(command_prefix="$", intents = intents)
 
 def ajout_historiques(auteur, commande):
+  # historique générale
   historique.append(commande) # ajout de la commande à l'historique générale
+  
   # historique perso
   hist_perso = hist_users.get(auteur, hash_key[auteur]) # récupération de l'historique personnel
-  # print("hist_perso: ", hist_perso)
   if hist_perso is None:
     hist_perso = liste.ChainedList()
     hist_perso.append(commande)
   else:
     hist_perso.append(commande)
   hist_users.add_key_value(auteur, hist_perso, hash_key[auteur]) # changement de l'historique perso
-  print(hist_users)
-  # print(historique)
+
   
 # Commandes -------------------------------------------------------------------------------------------------------------------------
 @client.command(name="cmd")
@@ -66,19 +66,23 @@ async def commandes(message):
   - $vider: vide entièrement l'historique des commandes
   
   - $cmd: renvoie la liste des commandes
-  - $cmd_user: renvoie l'historique des commandes d'un utilisateur $$$$$$$$$
+  - $cmd_user: renvoie l'historique de vos propre commande. Vous n'avez pas accès à l'historique des autres
   
   - $val: renvoie la liste des valeurs principales.
   - $ind: renvoie la liste des principaux indicateurs:
   - $tf: renvoie la liste des unitées de temps disponibles
 ```
 """)
+  
+@client.command(name="cmd_user")
+async def commandes_utilisateur(message):
+  hist_perso = hist_users.get(str(message.author), hash_key[str(message.author)])
+  await message.channel.send("Voici l'historique de vos commandes:")
+  await message.channel.send(hist_perso.to_str())
     
 @client.command(name="val")
 async def crypto(message):
   ajout_historiques(str(message.author), "$val")
-  # print(hist_users.get(str(message.author), hash_key[str(message.author)]))
-  # print(historique)
   await message.channel.send("""
 ```markdown
 # Liste des principals valeurs:
@@ -110,7 +114,6 @@ async def crypto(message):
 @client.command(name="ind")
 async def indicateurs(message):
   ajout_historiques(str(message.author), "$ind")
-  # print(historique)
   await message.channel.send("""
 ```markdown
 # Liste des principaux indicateurs:
@@ -127,7 +130,6 @@ async def indicateurs(message):
 @client.command(name="tf")
 async def time_frame(message):
   ajout_historiques(str(message.author), "$tf")
-  # print(historique)
   await message.channel.send("""
 ```markdown
 # Liste des unitées de temps:
@@ -156,13 +158,11 @@ async def last(message):
   else:
     await message.channel.send(f"Voici la dernière commande entrée par un utilisateur: {historique.get(historique.length - 1)}")
   ajout_historiques(str(message.author), "$last")
-  # print(historique)
-  
+
 @client.command(name="vider")
 async def vider(message):
   ajout_historiques(str(message.author), "$vider")
   historique.empty()
-  # print(historique)
 
 @client.command(name="plot")
 async def plot(message, val, ind, tf):
@@ -214,7 +214,6 @@ async def plot(message, val, ind, tf):
     
     # On ajout la commande seulement si elle fonctionne.
     ajout_historiques(str(message.author), "$plot" + " " + val + " " +  ind + " " +  tf)
-    # print(historique)
   except:
     print("problème avec le graphique")
 
