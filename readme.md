@@ -1,5 +1,5 @@
 ### To Do list:
-    - Trouvé pk le hash change à chaque fois (hashmap: le hash en static n'a pas l'aire de fonctionner)
+    - Faire la commande pour recupérer l'historique perso d'un utilisateur.
     - Faire arbre de discussion
 
 ### Configuration
