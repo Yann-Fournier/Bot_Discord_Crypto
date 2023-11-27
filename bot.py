@@ -44,7 +44,7 @@ def ajout_historiques(auteur, commande):
   historique.append(commande) # ajout de la commande à l'historique générale
   # historique perso
   hist_perso = hist_users.get(auteur, hash_key[auteur]) # récupération de l'historique personnel
-  print("hist_perso: ", hist_perso)
+  # print("hist_perso: ", hist_perso)
   if hist_perso is None:
     hist_perso = liste.ChainedList()
     hist_perso.append(commande)
@@ -151,12 +151,11 @@ async def time_frame(message):
 
 @client.command(name="last")
 async def last(message):
-  ajout_historiques(str(message.author), "$last")
   if historique.length == 0:
     await message.channel.send(f"Aucune commande n'a encore été entrée")
   else:
     await message.channel.send(f"Voici la dernière commande entrée par un utilisateur: {historique.get(historique.length - 1)}")
-  historique.append("$last")
+  ajout_historiques(str(message.author), "$last")
   # print(historique)
   
 @client.command(name="vider")
