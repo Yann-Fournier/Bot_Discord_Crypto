@@ -1,5 +1,4 @@
 ### To Do list:
-    - Faire la commande pour recupérer l'historique perso d'un utilisateur.
     - Faire arbre de discussion
 
 ### Configuration
