@@ -7,6 +7,7 @@ from dotenv import load_dotenv , find_dotenv
 from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
 from outils import arbre, graph, hashmap, liste # mes propres fichiers
+import hashlib
 
 # Initialisation ----------------------------------------------------------------------------------------------------------------------
 # Objets
@@ -14,12 +15,19 @@ historique = liste.ChainedList()
 hist_users = hashmap.HashMap(10) # Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
 # discussion = arbre.
 
+hashage = hashlib.sha256()
+hash_key = {
+  "ryulgc": 0,
+  "patchouf": 1,
+  "koliwki": 2
+}
+
 liste_chainée_ryulgc = liste.ChainedList()
 liste_chainée_patchouf = liste.ChainedList()
 liste_chainée_koliwki = liste.ChainedList()
-hist_users.add_key_value("ryulgc", liste_chainée_ryulgc)
-hist_users.add_key_value("patchouf", liste_chainée_patchouf)
-hist_users.add_key_value("koliwki", liste_chainée_koliwki)
+hist_users.add_key_value("ryulgc", liste_chainée_ryulgc, 0)
+hist_users.add_key_value("patchouf", liste_chainée_patchouf, 1)
+hist_users.add_key_value("koliwki", liste_chainée_koliwki, 2)
 print(hist_users)
 
 
@@ -32,18 +40,24 @@ bot_token = os.getenv('BOT_TOKEN')
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="$", intents = intents)
 
-# Commandes -------------------------------------------------------------------------------------------------------------------------
-@client.command(name="cmd")
-async def commandes(message):
-  historique.append("$cmd")
-  hist_perso = hist_users.get(str(message.author))
+def ajout_historiques(auteur, commande):
+  historique.append(commande) # ajout de la commande à l'historique générale
+  # historique perso
+  hist_perso = hist_users.get(auteur, hash_key[auteur]) # récupération de l'historique personnel
   print("hist_perso: ", hist_perso)
   if hist_perso is None:
     hist_perso = liste.ChainedList()
-    hist_perso.append("$cmd")
-  hist_users.add_key_value(str(message.author), hist_perso)
+    hist_perso.append(commande)
+  else:
+    hist_perso.append(commande)
+  hist_users.add_key_value(auteur, hist_perso, hash_key[auteur]) # changement de l'historique perso
   print(hist_users)
   # print(historique)
+  
+# Commandes -------------------------------------------------------------------------------------------------------------------------
+@client.command(name="cmd")
+async def commandes(message):
+  ajout_historiques(str(message.author), "$cmd")
   await message.channel.send("""
 ```markdown
 # Liste des commandes:
@@ -56,14 +70,14 @@ async def commandes(message):
   
   - $val: renvoie la liste des valeurs principales.
   - $ind: renvoie la liste des principaux indicateurs:
-  - $tf: renvoie la liste des périodes disponibles
+  - $tf: renvoie la liste des unitées de temps disponibles
 ```
 """)
     
 @client.command(name="val")
 async def crypto(message):
-  historique.append("$val")
-  print(hist_users.get(str(message.author)))
+  ajout_historiques(str(message.author), "$val")
+  # print(hist_users.get(str(message.author), hash_key[str(message.author)]))
   # print(historique)
   await message.channel.send("""
 ```markdown
@@ -95,7 +109,7 @@ async def crypto(message):
     
 @client.command(name="ind")
 async def indicateurs(message):
-  historique.append("$ind")
+  ajout_historiques(str(message.author), "$ind")
   # print(historique)
   await message.channel.send("""
 ```markdown
@@ -112,7 +126,7 @@ async def indicateurs(message):
     
 @client.command(name="tf")
 async def time_frame(message):
-  historique.append("$tf")
+  ajout_historiques(str(message.author), "$tf")
   # print(historique)
   await message.channel.send("""
 ```markdown
@@ -137,6 +151,7 @@ async def time_frame(message):
 
 @client.command(name="last")
 async def last(message):
+  ajout_historiques(str(message.author), "$last")
   if historique.length == 0:
     await message.channel.send(f"Aucune commande n'a encore été entrée")
   else:
@@ -146,6 +161,7 @@ async def last(message):
   
 @client.command(name="vider")
 async def vider(message):
+  ajout_historiques(str(message.author), "$vider")
   historique.empty()
   # print(historique)
 
@@ -198,7 +214,7 @@ async def plot(message, val, ind, tf):
     os.remove(str(message.author) + "_plot.png")
     
     # On ajout la commande seulement si elle fonctionne.
-    historique.append("$plot" + " " + val + " " +  ind + " " +  tf)
+    ajout_historiques(str(message.author), "$plot" + " " + val + " " +  ind + " " +  tf)
     # print(historique)
   except:
     print("problème avec le graphique")
@@ -216,7 +232,10 @@ async def on_typing(channel, user, when):
 async def on_member_join(member):
   general_channel = client.get_channel(1044900412551073832)
   liste_chainée = liste.ChainedList()
-  hist_users.add_key_value(str(member.name), liste_chainée) # création d'un historique perso pour chaque nouvel arrivant.
+  hashage.update(str.encode(member.name))
+  index = int(hashage.hexdigest(), 16) % 10
+  hash_key[str(member.name)] = index
+  hist_users.add_key_value(str(member.name), liste_chainée, index) # création d'un historique perso pour chaque nouvel arrivant.
   await general_channel.send("Bienvenue sur le serveur ! "+ member.name)
 
 @client.event
