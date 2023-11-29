@@ -51,7 +51,6 @@ def ajout_historiques(auteur, commande):
     hist_perso.append(commande)
   else:
     hist_perso.append(commande)
-  hist_users.add_key_value(auteur, hist_perso, hash_key[auteur]) # changement de l'historique perso
 
   
 # Commandes -------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +77,11 @@ async def commandes(message):
 async def commandes_utilisateur(message):
   hist_perso = hist_users.get(str(message.author), hash_key[str(message.author)])
   await message.channel.send("Voici l'historique de vos commandes:")
-  await message.channel.send(hist_perso.to_str())
+  if hist_perso.to_str() == "Vide":
+    await message.channel.send("Vous n'avez pas encore entrez de commande")
+  else:
+    await message.channel.send(hist_perso.to_str())
+  ajout_historiques(str(message.author), "$cmd_user")
     
 @client.command(name="val")
 async def crypto(message):
