@@ -1,5 +1,3 @@
-import sys
-sys.path.append('./')
 import discord
 from discord.ext import commands
 import os
@@ -166,6 +164,8 @@ async def last(message):
 async def vider(message):
   ajout_historiques(str(message.author), "$vider")
   historique.empty()
+  await message.channel.send("L'historique générale du bot à été vider!")
+
 
 @client.command(name="plot")
 async def plot(message, val, ind, tf):
