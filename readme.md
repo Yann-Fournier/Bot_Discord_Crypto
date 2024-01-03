@@ -17,7 +17,6 @@ Exemple:
 ```
 
 #### Commnades
----
 - [last](#last)
 - [vider](#vider)
 - [cmd](#cmd)
