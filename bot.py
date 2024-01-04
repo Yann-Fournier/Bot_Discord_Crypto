@@ -88,15 +88,18 @@ async def crypto(message):
 ```markdown
 # Liste des principals valeurs:
 
+Indices:
   - SPX: S&P500, 500 entreprise coté en bourse au Etats-Unis
   - CAC: CAC40, les 40 plus grandes entreprises françaises
   - NDQ: NASDAQ, 100 entreprise coté en bourse au Etats-Unis
 
+Cryptomonnaies:
   - BTCUSD: Bitcoin / U.S Dollard
   - BTCEUR: Bitcoin / Euro
   - ETHUSD: Etherum / U.S Dollard
   - BNBUSD: Binance coin / U.S Dollard
 
+Actions:
   - AAPL: Apple
   - TSLA: Tesla
   - NFLX: Netflix
@@ -105,6 +108,7 @@ async def crypto(message):
   - AMZN: Amazon
   - META: Meta
   
+Forex:
   - USOIL: le Pétrole
   - GOLD: l'Or
   - SILVER: l'Argent
