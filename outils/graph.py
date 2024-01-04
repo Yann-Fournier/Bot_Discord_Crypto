@@ -53,6 +53,16 @@ def get_indicator(df, ind):
             df["sma21"] = df['close'].rolling(21).mean()
     return df
 
+def simple_plot(df, pic_name, val):
+    df_plot = df.copy().iloc[-150:]
+    s = mpf.make_mpf_style(base_mpf_style='charles', rc={'font.size': 6})
+    fig = mpf.figure(2, figsize=(20, 15), style=s)
+    ax1 = fig.add_subplot(2,1,1, title=val)
+    mpf.plot(df_plot, type='candle', ax=ax1)
+    ax1.yaxis.set_label_position('left')
+    ax1.yaxis.tick_left()
+    plt.savefig(pic_name)
+
 def create_plot(df, ind, pic_name, val):
     match ind:
         case "rsi":

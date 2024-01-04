@@ -63,11 +63,14 @@ async def commandes(message):
   - $vider: vide entièrement l'historique des commandes
   
   - $cmd: renvoie la liste des commandes
-  - $cmd_user: renvoie l'historique de vos propre commande. Vous n'avez pas accès à l'historique des autres
+  - $cmd_user: renvoie l'historique de vos propre commande. Vous n'avez pas accès à l'historique des autres.
   
   - $val: renvoie la liste des valeurs principales.
-  - $ind: renvoie la liste des principaux indicateurs:
-  - $tf: renvoie la liste des unitées de temps disponibles
+  - $ind: renvoie la liste des indicateurs disponible dans le bot.
+  - $tf: renvoie la liste des unitées de temps disponibles dans le bot.
+  
+  - $plot: renvoie un graphique (val, tf).
+  - $plot_ind: renvoie un graphique avec un indicateur technique (val, ind, tf).
 ```
 """)
   
@@ -170,9 +173,60 @@ async def vider(message):
   historique.empty()
   await message.channel.send("L'historique générale du bot à été vider!")
 
-
 @client.command(name="plot")
-async def plot(message, val, ind, tf):
+async def plot(message, val, tf):
+  # Creation d'un channel perso pour envoyer les graphiques.
+  guild = message.guild
+  name = str(message.author) + "_plots"
+  is_already_create = False
+  
+  # On regarde si l'auteur du message possède déja un channel privé pour ces graphiques.
+  # pour ne pas polluer le channel général.
+  for channel in guild.channels:
+    if channel.name == name:
+      is_already_create = True
+
+  # Sinon on lui en créer un
+  if is_already_create == False:
+    overwrites = { # définition des permissions. faire en sort que ce channel soit privé.
+      guild.default_role: discord.PermissionOverwrite(read_messages=False),
+      guild.me: discord.PermissionOverwrite(read_messages=True),
+      message.author: discord.PermissionOverwrite(read_messages=True)
+    }
+    await guild.create_text_channel(name, overwrites=overwrites)
+    await message.send(f"Vous pouvez retrouver vos graphiques dans le salon textuel {name[0].upper() + name[1:]}")
+  
+  channel = discord.utils.get(guild.channels, name=name) # Récupération du channel lié à l'auteur du message
+  await channel.send(f"Je suis en train de créer votre graphique")
+  
+  try:
+    # récupération de l'echange
+    data = tv.search_symbol(text=val)
+    # Recupération de l'unité de temps
+    time_frame = graph.get_time_frame(tf=tf, Interval=Interval)
+    # Récupération des données et mise en forme.
+    crypto = tv.get_hist(symbol=val.upper(), exchange=data[0]["exchange"].upper(), interval=time_frame, n_bars=10_000)
+    df = pd.DataFrame(crypto)
+    del df['symbol']
+  except:
+    await channel.send("L'un des paramètres entrer n'est pas correct!")
+  
+  try:
+    # Création du graphique
+    graph.simple_plot(df, str(message.author) + "_plot.png", val=val.upper())
+    
+    # Envoie du graphique fini dans le channel correspondant.
+    await channel.send(f"Voici un graphique de {val} sur {tf}.")
+    await channel.send(file=discord.File(str(message.author) + "_plot.png"))
+    os.remove(str(message.author) + "_plot.png")
+    
+    # On ajout la commande seulement si elle fonctionne.
+    ajout_historiques(str(message.author), "$plot" + " " + val +  " " +  tf)
+  except:
+    print("problème avec le graphique")
+  
+@client.command(name="plot_ind")
+async def plot_ind(message, val, ind, tf):
   # Creation d'un channel perso pour envoyer les graphiques.
   guild = message.guild
   name = str(message.author) + "_plots"

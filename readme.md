@@ -18,8 +18,9 @@ Toutes les commandes doivent être précédée du signe `$` pour fonctionner.
 ```
 Exemple:
     - $last
-    - $plot val ind tf
+    - $plot val tf
     - $cmd_user
+    - $plot_ind val ind tf
 ```
 
 ### Commnades :
@@ -31,6 +32,7 @@ Exemple:
 - [ind](#ind)
 - [tf](#tf)
 - [plot](#plot)
+- [plot_ind](#plot_ind)
 
 #### cmd
     Permet de voir la liste des commandes disponibles.
@@ -55,4 +57,8 @@ Exemple:
 
 #### plot
     Permet de créer le graphique qui vous intéresse.
+    Cette commande prend trois paramètre: l'action ou autre (val) puis la période de temps (tf).
+
+#### plot_ind
+    Permet de créer le graphique qui vous intéresse avec un indicateur.
     Cette commande prend trois paramètre: l'action ou autre (val), l'indicateur (ind) puis la période de temps (tf).
