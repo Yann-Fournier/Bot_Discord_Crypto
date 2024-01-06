@@ -34,9 +34,6 @@ def ajout_historiques(auteur, commande):
     hist_perso.append(commande)
   else:
     hist_perso.append(commande)
-    
-  print(hist_users) 
-
   
 # Commandes -------------------------------------------------------------------------------------------------------------------------
 @client.command(name="cmd")
