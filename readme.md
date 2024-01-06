@@ -4,7 +4,9 @@
 
 # Bot Discord Trading Plot
 
-Ce bot vous permet de créer des graphiques en bougie japonnaise retraçant l'historique d'une action, d'une cryptomonnaie ou autre. Vous avez également la possibilité d'ajouter au graphique un indicateur technique. Ce graphique sera envoyer dans un salon textuel privé avec votre nom d'utilisateur suivi de "_plots". 
+Ce bot à été créer dans le cadre d'un projet pour mon école.\
+\
+Il vous permet de créer des graphiques en bougie japonnaise retraçant l'historique d'une action, d'une cryptomonnaie ou autre. Vous avez également la possibilité d'ajouter au graphique un indicateur technique. Ce graphique sera envoyer dans un salon textuel privé avec votre nom d'utilisateur suivi de "_plots". 
 
 > Le bot récupère les données sur TradingView. N'hésitez pas à vous renseigner sur le nom d'une cryptomonnaie ou d'une action sur [TradingView](https://fr.tradingview.com/). Sinon, vous trouverez des exemples d'actions et autre et d'indicateur avec les commandes du bot.
 
