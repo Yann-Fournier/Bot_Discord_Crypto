@@ -317,7 +317,6 @@ async def on_message(message):
   # permet de les touver si le message envoyer est une commande
   # permet de faire fonctionner les commande
   await client.process_commands(message)
-
      
 # Lancement du bot ------------------------------------------------------------------------------------------------------------------------
 client.run(bot_token)
