@@ -23,3 +23,9 @@ class HashMap:
                 return self.buckets[index][i][1]
         return None
     
+    def empty(self, key, value, index):
+        for i in range(len(self.buckets[index])):
+            if self.buckets[index][i][0] == key:
+                self.buckets[index].pop(i)
+        self.buckets[index].append((key, value))
+    

@@ -1,5 +1,5 @@
 ## To Do list:
-    - Faire arbre de discussion (ecriture, code)
+    - Faire arbre de discussion (archi, code)
     - Faire documentation commandes
 
 # Bot Discord Trading Plot
@@ -13,20 +13,21 @@ Changer ``.env.exemple`` en ``.env`` et insérer le token de votre bot discord e
 
 ## Documentation
 
-Toutes les commandes doivent être précédée du signe `$` pour fonctionner.
+Toutes les commandes doivent être précédée du signe `!` pour fonctionner.
 
 ```
 Exemple:
-    - $last
-    - $plot val tf
-    - $cmd_user
-    - $plot_ind val ind tf
+    - !last
+    - !plot val tf
+    - !cmd_user
+    - !plot_ind val ind tf
 ```
 
 ### Commnades :
 - [cmd](#cmd)
 - [last](#last)
-- [vider](#vider)
+- [empty](#empty)
+- [empty_user](#empty_user)
 - [cmd_user](#cmd_user)
 - [val](#val)
 - [ind](#ind)
@@ -40,8 +41,11 @@ Exemple:
 #### last
     Permet de voir la dernière commande entrée dans le bot.
 
-#### vider
-    Permet de vider l'historique du bot.
+#### empty
+    Permet de vider enitèrement l'historique du bot (historique général).
+
+#### empty_user
+    Permet de vider entièrement l'historique de vos commandes (historique personnel).
 
 #### cmd_user
     Permet de voir lhistoique de vos commandes.

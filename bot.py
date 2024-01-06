@@ -12,23 +12,8 @@ import hashlib
 historique = liste.ChainedList()
 hist_users = hashmap.HashMap(10) # Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
 # discussion = arbre.
-
 hashage = hashlib.sha256()
-hash_key = {
-  "ryulgc": 0,
-  "patchouf": 1,
-  "koliwki": 2
-}
-
-liste_chainée_ryulgc = liste.ChainedList()
-liste_chainée_patchouf = liste.ChainedList()
-liste_chainée_koliwki = liste.ChainedList()
-hist_users.add_key_value("ryulgc", liste_chainée_ryulgc, 0)
-hist_users.add_key_value("patchouf", liste_chainée_patchouf, 1)
-hist_users.add_key_value("koliwki", liste_chainée_koliwki, 2)
-print(hist_users)
-
-
+hash_key = {}
 tv = TvDatafeed() # création de la connection à Tradingview.
 
 # Récuper le .env et stocker le token dans une variable
@@ -36,7 +21,7 @@ load_dotenv(find_dotenv())
 bot_token = os.getenv('BOT_TOKEN')
 
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix="$", intents = intents)
+client = commands.Bot(command_prefix="!", intents = intents)
 
 def ajout_historiques(auteur, commande):
   # historique générale
@@ -49,44 +34,47 @@ def ajout_historiques(auteur, commande):
     hist_perso.append(commande)
   else:
     hist_perso.append(commande)
+    
+  print(hist_users) 
 
   
 # Commandes -------------------------------------------------------------------------------------------------------------------------
 @client.command(name="cmd")
 async def commandes(message):
-  ajout_historiques(str(message.author), "$cmd")
+  ajout_historiques(str(message.author), "!cmd")
   await message.channel.send("""
 ```markdown
 # Liste des commandes:
 
-  - $last: renvoie la dernière commande entrée
-  - $vider: vide entièrement l'historique des commandes
+  - !last: renvoie la dernière commande entrée
+  - !empty: vide entièrement l'historique des commandes du bot
+  - !empty_user: vide entièrement l'historique de vos commandes
   
-  - $cmd: renvoie la liste des commandes
-  - $cmd_user: renvoie l'historique de vos propre commande. Vous n'avez pas accès à l'historique des autres.
+  - !cmd: renvoie la liste des commandes
+  - !cmd_user: renvoie l'historique de vos propre commande. Vous n'avez pas accès à l'historique des autres.
   
-  - $val: renvoie la liste des valeurs principales.
-  - $ind: renvoie la liste des indicateurs disponible dans le bot.
-  - $tf: renvoie la liste des unitées de temps disponibles dans le bot.
+  - !val: renvoie la liste des valeurs principales.
+  - !ind: renvoie la liste des indicateurs disponible dans le bot.
+  - !tf: renvoie la liste des unitées de temps disponibles dans le bot.
   
-  - $plot: renvoie un graphique (val, tf).
-  - $plot_ind: renvoie un graphique avec un indicateur technique (val, ind, tf).
+  - !plot: renvoie un graphique (val, tf).
+  - !plot_ind: renvoie un graphique avec un indicateur technique (val, ind, tf).
 ```
 """)
   
 @client.command(name="cmd_user")
 async def commandes_utilisateur(message):
   hist_perso = hist_users.get(str(message.author), hash_key[str(message.author)])
-  await message.channel.send("Voici l'historique de vos commandes:")
   if hist_perso.to_str() == "Vide":
     await message.channel.send("Vous n'avez pas encore entrez de commande")
   else:
+    await message.channel.send("Voici l'historique de vos commandes:")
     await message.channel.send(hist_perso.to_str())
-  ajout_historiques(str(message.author), "$cmd_user")
+  ajout_historiques(str(message.author), "!cmd_user")
     
 @client.command(name="val")
 async def crypto(message):
-  ajout_historiques(str(message.author), "$val")
+  ajout_historiques(str(message.author), "!val")
   await message.channel.send("""
 ```markdown
 # Liste des principals valeurs:
@@ -121,7 +109,7 @@ Forex:
     
 @client.command(name="ind")
 async def indicateurs(message):
-  ajout_historiques(str(message.author), "$ind")
+  ajout_historiques(str(message.author), "!ind")
   await message.channel.send("""
 ```markdown
 # Liste des principaux indicateurs:
@@ -137,7 +125,7 @@ async def indicateurs(message):
     
 @client.command(name="tf")
 async def time_frame(message):
-  ajout_historiques(str(message.author), "$tf")
+  ajout_historiques(str(message.author), "!tf")
   await message.channel.send("""
 ```markdown
 # Liste des unitées de temps:
@@ -165,14 +153,19 @@ async def last(message):
     await message.channel.send(f"Aucune commande n'a encore été entrée")
   else:
     await message.channel.send(f"Voici la dernière commande entrée par un utilisateur: {historique.get(historique.length - 1)}")
-  ajout_historiques(str(message.author), "$last")
+  ajout_historiques(str(message.author), "!last")
 
-@client.command(name="vider")
+@client.command(name="empty")
 async def vider(message):
-  ajout_historiques(str(message.author), "$vider")
+  ajout_historiques(str(message.author), "!empty")
   historique.empty()
   await message.channel.send("L'historique générale du bot à été vider!")
 
+@client.command(name="empty_user")
+async def vider(message):
+  hist_users.empty(str(message.author), liste.ChainedList(), hash_key[str(message.author)])
+  await message.channel.send("Votre historique personnel à bien été vider!")
+  
 @client.command(name="plot")
 async def plot(message, val, tf):
   # Creation d'un channel perso pour envoyer les graphiques.
@@ -221,7 +214,7 @@ async def plot(message, val, tf):
     os.remove(str(message.author) + "_plot.png")
     
     # On ajout la commande seulement si elle fonctionne.
-    ajout_historiques(str(message.author), "$plot" + " " + val +  " " +  tf)
+    ajout_historiques(str(message.author), "!plot" + " " + val +  " " +  tf)
   except:
     print("problème avec le graphique")
   
@@ -274,13 +267,23 @@ async def plot_ind(message, val, ind, tf):
     os.remove(str(message.author) + "_plot.png")
     
     # On ajout la commande seulement si elle fonctionne.
-    ajout_historiques(str(message.author), "$plot" + " " + val + " " +  ind + " " +  tf)
+    ajout_historiques(str(message.author), "!plot" + " " + val + " " +  ind + " " +  tf)
   except:
     print("problème avec le graphique")
 
 # Events ---------------------------------------------------------------------------------------------------------------------------------
 @client.event
 async def on_ready():
+  # Création des historiques personnels
+  for guild in client.guilds:
+    for member in guild.members:
+      hashage.update(str.encode(member.name))
+      index = int(hashage.hexdigest(), 16) % 10
+      hash_key[member.name] = index
+      hist_users.add_key_value(member.name , liste.ChainedList(), index)
+      # print(member.name)
+      
+  # print(hist_users) 
   print("Le bot est prêt !")
 
 @client.event
@@ -290,12 +293,11 @@ async def on_typing(channel, user, when):
 @client.event
 async def on_member_join(member):
   general_channel = client.get_channel(1044900412551073832)
-  liste_chainée = liste.ChainedList()
   hashage.update(str.encode(member.name))
   index = int(hashage.hexdigest(), 16) % 10
   hash_key[str(member.name)] = index
-  hist_users.add_key_value(str(member.name), liste_chainée, index) # création d'un historique perso pour chaque nouvel arrivant.
-  await general_channel.send("Bienvenue sur le serveur ! "+ member.name)
+  hist_users.add_key_value(str(member.name), liste.ChainedList(), index) # création d'un historique perso pour chaque nouvel arrivant.
+  await general_channel.send("Bienvenue sur le serveur "+ member.name  + " !")
 
 @client.event
 async def on_message(message):
@@ -321,5 +323,6 @@ async def on_message(message):
   # permet de faire fonctionner les commande
   await client.process_commands(message)
 
+     
 # Lancement du bot ------------------------------------------------------------------------------------------------------------------------
 client.run(bot_token)
