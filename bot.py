@@ -278,9 +278,7 @@ async def on_ready():
       index = int(hashage.hexdigest(), 16) % 10
       hash_key[member.name] = index
       hist_users.add_key_value(member.name , liste.ChainedList(), index)
-      # print(member.name)
-      
-  # print(hist_users) 
+
   print("Le bot est prêt !")
 
 @client.event
