@@ -4,41 +4,46 @@ import os
 from dotenv import load_dotenv , find_dotenv
 from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
-from outils import arbre, graph, hashmap, liste # mes propres fichiers
 import hashlib
+from outils import arbre, graph, hashmap, liste # mes propres fichiers
 
-# Initialisation ----------------------------------------------------------------------------------------------------------------------
-# Objets
-historique = liste.ChainedList()
-hist_users = hashmap.HashMap(10) # Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
-# discussion = arbre.
-hashage = hashlib.sha256()
-hash_key = {}
+# Initialisation des objets ----------------------------------------------------------------------------------------------------------------------
+historique = liste.ChainedList() # historique générale du bot
+hist_users = hashmap.HashMap(10) # Hashmap contenant les historiques personnel des utilisateurs. [[('username', liste.ChainedList()]] 
+# Je ne pense pas avoir plus d'une dizaine personnes sur mon server.
+hash_key = {} # indice de l'historique personnel. 'username': indice(int). 
+hashage = hashlib.sha256() # hash utiliser pour recupérer l'indice de la hashmap ou mettre l'historique personnel  
 tv = TvDatafeed() # création de la connection à Tradingview.
 
 # Récuper le .env et stocker le token dans une variable
 load_dotenv(find_dotenv())
 bot_token = os.getenv('BOT_TOKEN')
 
+# Création du lien avec discord
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!", intents = intents)
 
+# Permet d'ajouter les commandes au historiques
 def ajout_historiques(auteur, commande):
   # historique générale
   historique.append(commande) # ajout de la commande à l'historique générale
   
   # historique perso
   hist_perso = hist_users.get(auteur, hash_key[auteur]) # récupération de l'historique personnel
-  if hist_perso is None:
+  # ajout de la commande:
+  if hist_perso is None: 
     hist_perso = liste.ChainedList()
     hist_perso.append(commande)
   else:
     hist_perso.append(commande)
   
 # Commandes -------------------------------------------------------------------------------------------------------------------------
+
+# cf readmme.md pour l'explication des fonctions
+
 @client.command(name="cmd")
 async def commandes(message):
-  ajout_historiques(str(message.author), "!cmd")
+  ajout_historiques(str(message.author), "!cmd") # ajout de la commandes aux historiques
   await message.channel.send("""
 ```markdown
 # Liste des commandes:
@@ -61,17 +66,19 @@ async def commandes(message):
   
 @client.command(name="cmd_user")
 async def commandes_utilisateur(message):
-  hist_perso = hist_users.get(str(message.author), hash_key[str(message.author)])
-  if hist_perso.to_str() == "Vide":
+  hist_perso = hist_users.get(str(message.author), hash_key[str(message.author)]) # récupération de l'historique personnel
+  str_hist = hist_perso.to_str() # transformation en chaine de caractère
+  # Envoie de l'historique
+  if str_hist == "Vide":
     await message.channel.send("Vous n'avez pas encore entrez de commande")
   else:
     await message.channel.send("Voici l'historique de vos commandes:")
-    await message.channel.send(hist_perso.to_str())
-  ajout_historiques(str(message.author), "!cmd_user")
+    await message.channel.send(str_hist)
+  ajout_historiques(str(message.author), "!cmd_user") # ajout de la commandes aux historiques
     
 @client.command(name="val")
 async def crypto(message):
-  ajout_historiques(str(message.author), "!val")
+  ajout_historiques(str(message.author), "!val") # ajout de la commandes aux historiques
   await message.channel.send("""
 ```markdown
 # Liste des principals valeurs:
@@ -106,7 +113,7 @@ Forex:
     
 @client.command(name="ind")
 async def indicateurs(message):
-  ajout_historiques(str(message.author), "!ind")
+  ajout_historiques(str(message.author), "!ind") # ajout de la commandes aux historiques
   await message.channel.send("""
 ```markdown
 # Liste des principaux indicateurs:
@@ -122,7 +129,7 @@ async def indicateurs(message):
     
 @client.command(name="tf")
 async def time_frame(message):
-  ajout_historiques(str(message.author), "!tf")
+  ajout_historiques(str(message.author), "!tf") # ajout de la commandes aux historiques
   await message.channel.send("""
 ```markdown
 # Liste des unitées de temps:
@@ -146,26 +153,28 @@ async def time_frame(message):
 
 @client.command(name="last")
 async def last(message):
-  if historique.length == 0:
+  if historique.length == 0: # On vérifie si l'historique est vide
     await message.channel.send(f"Aucune commande n'a encore été entrée")
-  else:
+  else: # sinon on l'envoie dans le canal de discution
     await message.channel.send(f"Voici la dernière commande entrée par un utilisateur: {historique.get(historique.length - 1)}")
-  ajout_historiques(str(message.author), "!last")
+  ajout_historiques(str(message.author), "!last") # ajout de la commandes aux historiques
 
 @client.command(name="empty")
 async def vider(message):
-  ajout_historiques(str(message.author), "!empty")
-  historique.empty()
+  ajout_historiques(str(message.author), "!empty") # ajout de la commandes aux historiques
+  historique.empty() # Puis on vide l'historique du bot (historique générale)
   await message.channel.send("L'historique générale du bot à été vider!")
 
 @client.command(name="empty_user")
 async def vider(message):
-  hist_users.empty(str(message.author), liste.ChainedList(), hash_key[str(message.author)])
+  ajout_historiques(str(message.author), "!empty_user") # ajout de la commandes aux historiques
+  # On vide l'historique personnel de l'utilisateur
+  hist_users.empty(str(message.author), liste.ChainedList(), hash_key[str(message.author)]) 
   await message.channel.send("Votre historique personnel à bien été vider!")
   
 @client.command(name="plot")
 async def plot(message, val, tf):
-  # Creation d'un channel perso pour envoyer les graphiques.
+  # Creation d'un channel perso pour envoyer les graphiques. Pour ne pas polluer les cannaux généraux.
   guild = message.guild
   name = str(message.author) + "_plots"
   is_already_create = False
@@ -179,14 +188,14 @@ async def plot(message, val, tf):
   # Sinon on lui en créer un
   if is_already_create == False:
     overwrites = { # définition des permissions. faire en sort que ce channel soit privé.
-      guild.default_role: discord.PermissionOverwrite(read_messages=False),
-      guild.me: discord.PermissionOverwrite(read_messages=True),
-      message.author: discord.PermissionOverwrite(read_messages=True)
+      guild.default_role: discord.PermissionOverwrite(read_messages=False), # Les autre
+      guild.me: discord.PermissionOverwrite(read_messages=True), # Le bot
+      message.author: discord.PermissionOverwrite(read_messages=True) # l'auteur du message
     }
-    await guild.create_text_channel(name, overwrites=overwrites)
+    await guild.create_text_channel(name, overwrites=overwrites) # création du canal
     await message.send(f"Vous pouvez retrouver vos graphiques dans le salon textuel {name[0].upper() + name[1:]}")
   
-  channel = discord.utils.get(guild.channels, name=name) # Récupération du channel lié à l'auteur du message
+  channel = discord.utils.get(guild.channels, name=name) # Récupération du canal lié à l'auteur du message
   await channel.send(f"Je suis en train de créer votre graphique")
   
   try:
@@ -200,6 +209,7 @@ async def plot(message, val, tf):
     del df['symbol']
   except:
     await channel.send("L'un des paramètres entrer n'est pas correct!")
+    return # On arrête la fonction
   
   try:
     # Création du graphique
@@ -208,16 +218,17 @@ async def plot(message, val, tf):
     # Envoie du graphique fini dans le channel correspondant.
     await channel.send(f"Voici un graphique de {val} sur {tf}.")
     await channel.send(file=discord.File(str(message.author) + "_plot.png"))
-    os.remove(str(message.author) + "_plot.png")
+    os.remove(str(message.author) + "_plot.png") # on supprime la photo du graphique
     
-    # On ajout la commande seulement si elle fonctionne.
+    # On ajoute la commande aux historiques seulement si elle fonctionne.
     ajout_historiques(str(message.author), "!plot" + " " + val +  " " +  tf)
   except:
+    return # on arrête la fonction
     print("problème avec le graphique")
   
 @client.command(name="plot_ind")
 async def plot_ind(message, val, ind, tf):
-  # Creation d'un channel perso pour envoyer les graphiques.
+  # Creation d'un channel perso pour envoyer les graphiques. Pour ne pas polluer les cannaux généraux.
   guild = message.guild
   name = str(message.author) + "_plots"
   is_already_create = False
@@ -230,15 +241,15 @@ async def plot_ind(message, val, ind, tf):
 
   # Sinon on lui en créer un
   if is_already_create == False:
-    overwrites = { # définition des permissions. faire en sort que ce channel soit privé.
-      guild.default_role: discord.PermissionOverwrite(read_messages=False),
-      guild.me: discord.PermissionOverwrite(read_messages=True),
-      message.author: discord.PermissionOverwrite(read_messages=True)
+    overwrites = { # définition des permissions. faire en sort que ce canal soit privé.
+      guild.default_role: discord.PermissionOverwrite(read_messages=False), # Les autres
+      guild.me: discord.PermissionOverwrite(read_messages=True), # Le bot
+      message.author: discord.PermissionOverwrite(read_messages=True) # L'auteur du message
     }
-    await guild.create_text_channel(name, overwrites=overwrites)
+    await guild.create_text_channel(name, overwrites=overwrites) # création du canal
     await message.send(f"Vous pouvez retrouver vos graphiques dans le salon textuel {name[0].upper() + name[1:]}")
   
-  channel = discord.utils.get(guild.channels, name=name) # Récupération du channel lié à l'auteur du message
+  channel = discord.utils.get(guild.channels, name=name) # Récupération du canal lié à l'auteur du message
   await channel.send(f"Je suis en train de créer votre graphique")
   
   try:
@@ -261,58 +272,44 @@ async def plot_ind(message, val, ind, tf):
     # Envoie du graphique fini dans le channel correspondant.
     await channel.send(f"Voici un graphique de {val} avec le {ind} sur {tf}.")
     await channel.send(file=discord.File(str(message.author) + "_plot.png"))
-    os.remove(str(message.author) + "_plot.png")
+    os.remove(str(message.author) + "_plot.png") # on supprime la photo du graphique
     
-    # On ajout la commande seulement si elle fonctionne.
+    # On ajout la commande aux historiques seulement si elle fonctionne.
     ajout_historiques(str(message.author), "!plot" + " " + val + " " +  ind + " " +  tf)
   except:
     print("problème avec le graphique")
 
 # Events ---------------------------------------------------------------------------------------------------------------------------------
 @client.event
-async def on_ready():
-  # Création des historiques personnels des membres déjà présent
-  for guild in client.guilds:
-    for member in guild.members:
-      hashage.update(str.encode(member.name))
-      index = int(hashage.hexdigest(), 16) % 10
-      hash_key[member.name] = index
-      hist_users.add_key_value(member.name , liste.ChainedList(), index)
-
-  print("Le bot est prêt !")
-
-@client.event
-async def on_typing(channel, user, when):
-  await channel.send(user.name+" is typing")
+async def on_ready(): # que faire quand le bot est près à l'emploi ?
+  # Création des historiques personnels des membres déjà présents
+  for guild in client.guilds: # Pour tous les servers ou le bot est présent 
+    for member in guild.members: # Pour tous les membres
+      hashage.update(str.encode(member.name)) # hashage du nom d'utilisateur
+      index = int(hashage.hexdigest(), 16) % 10 # récupération de l'indice de ou sera stocker son historique personnel
+      hash_key[member.name] = index # ajout de l'indice dans le dictionnaire.
+      hist_users.add_key_value(member.name , liste.ChainedList(), index) # création de l'historique
+  print("Le bot est prêt !") # Le démarrage du bot à bien été éfféctuer.
 
 @client.event
-async def on_member_join(member):
-  general_channel = client.get_channel(1044900412551073832)
-  hashage.update(str.encode(member.name))
-  index = int(hashage.hexdigest(), 16) % 10
-  hash_key[str(member.name)] = index
-  hist_users.add_key_value(str(member.name), liste.ChainedList(), index) # création d'un historique perso pour chaque nouvel arrivant.
-  await general_channel.send("Bienvenue sur le serveur "+ member.name  + " !")
-
+async def on_member_join(member): # quand un nouveau membre rejoind le server
+  general_channel = client.get_channel(1167398798469906434) # récupération du canal général
+  hashage.update(str.encode(member.name)) # hashage du nom d'utilisateur
+  index = int(hashage.hexdigest(), 16) % 10 # récupération de l'indice de ou sera stocker son historique personnel
+  hash_key[str(member.name)] = index # ajout de l'indice dans le dictionnaire.
+  hist_users.add_key_value(str(member.name), liste.ChainedList(), index) # création de l'historique personnel du nouvel arrivant
+  await general_channel.send("Bienvenue sur le serveur "+ member.name  + " !") # petit message de bienvenue.
+  
 @client.event
 async def on_message(message):
   
-  # Permet au bo de ne pas ce parler à lui même
+  # Permet au bot de ne pas ce parler à lui même
   # print(message.content)
   if message.author == client.user:
     return
 
-  # # On gère les contenue des messages
-  # message.content = message.content.lower()
-
-  if message.content.startswith("hello"):
-    await message.channel.send("Hello")
-
-  if "cochon" in message.content:
-    await message.channel.send("Tu est ban.")
-
-  if message.content == "azerty":
-    await message.channel.send("qwerty")
+  # On gère les contenue des messages
+  message.content = message.content.lower()
 
   # permet de les touver si le message envoyer est une commande
   # permet de faire fonctionner les commande
