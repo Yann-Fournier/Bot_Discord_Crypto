@@ -2,6 +2,7 @@ import ta
 import mplfinance as mpf
 import matplotlib.pyplot as plt
 
+# Recupération de l'intervale de temps entré par l'utilisateur.
 def get_time_frame(tf, Interval):
     match tf:
         case "1m":
@@ -31,26 +32,34 @@ def get_time_frame(tf, Interval):
         case "1M":
             return Interval.in_monthly
 
-def get_indicator(df, ind):
+# Recupération de l'indicateur entré par l'utilisateur.
+# N'hesiter pas à vous renseignez sur les calculs reliés aux differents indicateurs
+def get_indicator(df, ind): # On ajoute les colonnes, correspondants à l'indicateur, dans le dataframe pandas
     match ind:
         case "rsi":
-            df["rsi"] = ta.momentum.rsi(df['close'], 14)
-            df['rsima'] = df['rsi'].rolling(14).mean()
+            df["rsi"] = ta.momentum.rsi(df['close'], 14) # rsi avec une periode de 14 unitées de temps
+            df['rsima'] = df['rsi'].rolling(14).mean() # une moyenne des 14 dernières unitées de temps
         case "macd":
+            # macd avec une période lente de 26 unitées de temps et une période rapide de 12 unitées de temps
             df["macd"] = ta.trend.macd(close=df["close"], window_slow=26, window_fast=12)
+            # macd différence avec une période lente de 26 unitées de temps et une période rapide de 12 unitées de temps
             df["macd_diff"] = ta.trend.macd_diff(close=df["close"], window_slow=26, window_fast=12)
+            # macd signal avec une période lente de 26 unitées de temps et une période rapide de 12 unitées de temps
             df["macd_signal"] = ta.trend.macd_signal(close=df["close"], window_slow=26, window_fast=12, window_sign=9, fillna=False)
         case "stoch":
+            # Stochastique avec une periode de 14 unitées de temps 
             df["stoch_%K"] = ta.momentum.stoch(high=df["high"], low=df["low"], close=df["close"], window= 14,smooth_window=3, fillna=False)
+            # moyenne des trois dernières unitées de temps du Stochastique
             df["stoch_%D"] = df['stoch_%K'].rolling(3).mean()
-        case "boll":
+        case "boll": 
+            # Bandes de Bollinger effectuer sur une période de 20 unitées de temps
             bol_band = ta.volatility.BollingerBands(close=df["close"], window=20, window_dev=2.25)
             df["lower_band"] = bol_band.bollinger_lband()
             df["higher_band"] = bol_band.bollinger_hband()
             df["ma_band"] = bol_band.bollinger_mavg()
         case "mm":
-            df["sma9"] = df['close'].rolling(9).mean()
-            df["sma21"] = df['close'].rolling(21).mean()
+            df["sma9"] = df['close'].rolling(9).mean() # moyenne des 9 dernières unitées de temps du prix de fermeture de session
+            df["sma21"] = df['close'].rolling(21).mean() # moyenne des 21 dernières unitées de temps du prix de fermeture de session
     return df
 
 def simple_plot(df, pic_name, val):

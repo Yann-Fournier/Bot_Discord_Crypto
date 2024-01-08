@@ -1,3 +1,6 @@
+# Je n'ai pas fait d'arbre de discussion
+# Je n'est pas utiliser ce fichier
+
 class NodeBinaryTree :
     def __init__(self,data):
         self.data = data
@@ -36,7 +39,7 @@ class BinaryTree:
             return self.current_node.data
 
 
-# ----------------------------------------------------------------------------------------
+# Arbre non binaire ----------------------------------------------------------------------------------------
 
 class NodeTree:
     def __init__(self, data):
