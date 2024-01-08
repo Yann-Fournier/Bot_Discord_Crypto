@@ -46,7 +46,7 @@ Exemple:
     Permet de vider entièrement l'historique de vos commandes (historique personnel).
 
 #### cmd_user
-    Permet de voir lhistoique de vos commandes.
+    Permet de voir l'histoique de vos commandes (historique personnel).
 
 #### val
     Permet de voir une liste non exhaustive d'action ou de cryptomonnaie et autre utilisable dans le bot.  
@@ -59,7 +59,7 @@ Exemple:
 
 #### plot
     Permet de créer le graphique qui vous intéresse.
-    Cette commande prend trois paramètre: l'action ou autre (val) puis la période de temps (tf).
+    Cette commande prend deux paramètre: l'action ou autre (val) puis la période de temps (tf).
 
 #### plot_ind
     Permet de créer le graphique qui vous intéresse avec un indicateur.
