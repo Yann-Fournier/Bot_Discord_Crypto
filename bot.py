@@ -271,7 +271,7 @@ async def plot_ind(message, val, ind, tf):
 # Events ---------------------------------------------------------------------------------------------------------------------------------
 @client.event
 async def on_ready():
-  # Création des historiques personnels
+  # Création des historiques personnels des membres déjà présent
   for guild in client.guilds:
     for member in guild.members:
       hashage.update(str.encode(member.name))

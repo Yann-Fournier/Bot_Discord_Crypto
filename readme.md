@@ -1,7 +1,3 @@
-## To Do list:
-    - Faire arbre de discussion (archi, code)
-    - Faire documentation commandes
-
 # Bot Discord Trading Plot
 
 Ce bot à été créer dans le cadre d'un projet pour mon école.\
